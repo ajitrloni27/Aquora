@@ -1,4 +1,4 @@
-# Aqua Rover 🌊🤖
+# Aqua Rover 
 
 **An AI-integrated semi-autonomous water-surface rover designed to detect and help collect floating waste, especially plastic.**
 
@@ -6,7 +6,7 @@ Aqua Rover combines computer vision, edge computing, backend services, and a web
 
 ---
 
-## 🎯 Project Overview
+##  Project Overview
 
 - **Primary Product:** Aqua Rover
 - **Core Mission:** Detect floating plastic waste (bottles, bags, wrappers, cups, mixed waste)
@@ -16,7 +16,7 @@ Aqua Rover combines computer vision, edge computing, backend services, and a web
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 ```text
 Camera
