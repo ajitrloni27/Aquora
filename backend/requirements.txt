@@ -8,3 +8,23 @@ alembic>=1.13.1
 python-dotenv>=1.0.1
 pytest>=8.1.0
 httpx>=0.27.0
+
+1. The Core Stack
+fastapi: The main REST API framework.
+uvicorn[standard]: The ASGI server required to actually run the FastAPI app.
+pydantic: Used for validating the incoming JSON payloads (Telemetry and Detections) against your contracts.
+sqlalchemy: The ORM used to interact with the PostgreSQL database.
+psycopg2-binary: The database driver that allows SQLAlchemy to talk to PostgreSQL.
+alembic: Required for managing database migrations (updating your tables when you add new columns later).
+
+
+2. Environment & Configuration 
+pydantic-settings: The standard way to manage environment variables and .env files in FastAPI. It ensures you never hard-
+code secrets (like your database URL).
+python-dotenv: Works alongside pydantic-settings to load your .env file into the application when it starts.
+
+
+3. Testing
+pytest: The standard Python testing framework. The rules state: "Test important endpoints and database logic."
+httpx: Required by FastAPI's TestClient to simulate HTTP requests (like POST /detections) during your automated tests.
+
