@@ -17,7 +17,7 @@ Aqua Rover combines computer vision, edge computing, backend services, and a web
 ---
 
 ##  System Architecture
-
+  
 ```text
 Camera
   ↓
