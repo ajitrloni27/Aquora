@@ -1,52 +1,37 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.rover import RoverStatus
-from app.schemas.rover import RoverStatusCreate, RoverStatusResponse
 
-router = APIRouter(prefix="/rover", tags=["Rover"])
+from app.db.session import get_db
+from app.schemas.rover import RoverCreate, RoverResponse
+from app.services import rover_service
+
+router = APIRouter(tags=["Rover"])
 
 
-@router.get("/status", response_model=RoverStatusResponse)
-def get_current_rover_status(db: Session = Depends(get_db)):
+# ---------------------------------------------------------
+# Sprint 1 Rover CRUD Endpoints (/rovers)
+# ---------------------------------------------------------
+
+@router.post("/rovers", response_model=RoverResponse, status_code=status.HTTP_201_CREATED)
+def register_rover(payload: RoverCreate, db: Session = Depends(get_db)):
     """
-    Get the latest operational status and telemetry of the rover.
-    If no telemetry has been logged yet, initializes a default record.
+    Register a new rover. Returns 409 Conflict if rover_id already exists.
     """
-    latest = db.query(RoverStatus).order_by(RoverStatus.id.desc()).first()
-    if not latest:
-        # Create an initial default status entry if table is empty
-        latest = RoverStatus(
-            battery_level=100.0,
-            temperature=24.5,
-            depth=0.0,
-            speed=0.0,
-            status="idle",
-            latitude=15.2993,
-            longitude=74.1240,
-        )
-        db.add(latest)
-        db.commit()
-        db.refresh(latest)
-    return latest
+    return rover_service.create_rover(db, payload)
 
 
-@router.post("/status", response_model=RoverStatusResponse, status_code=status.HTTP_201_CREATED)
-def record_rover_status(payload: RoverStatusCreate, db: Session = Depends(get_db)):
+@router.get("/rovers", response_model=List[RoverResponse])
+def get_all_rovers(db: Session = Depends(get_db)):
     """
-    Post a new telemetry/status report from the rover.
+    List all registered rovers.
     """
-    new_status = RoverStatus(**payload.model_dump())
-    db.add(new_status)
-    db.commit()
-    db.refresh(new_status)
-    return new_status
+    return rover_service.list_rovers(db)
 
 
-@router.get("/status/history", response_model=List[RoverStatusResponse])
-def get_rover_status_history(limit: int = 50, db: Session = Depends(get_db)):
+@router.get("/rovers/{rover_id}", response_model=RoverResponse)
+def get_rover_details(rover_id: str, db: Session = Depends(get_db)):
     """
-    Retrieve historical telemetry records.
+    Get registered rover details by unique rover_id (e.g. AR-001). Returns 404 if not found.
     """
-    return db.query(RoverStatus).order_by(RoverStatus.id.desc()).limit(limit).all()
+    return rover_service.get_rover_by_id(db, rover_id)
