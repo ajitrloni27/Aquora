@@ -3,21 +3,17 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RoverStatusBase(BaseModel):
-    battery_level: float = Field(..., ge=0.0, le=100.0, description="Battery percentage (0-100)")
-    temperature: float = Field(..., description="Operating temperature in Celsius")
-    depth: float = Field(default=0.0, ge=0.0, description="Current depth in meters")
-    speed: float = Field(default=0.0, ge=0.0, description="Speed in m/s")
-    status: str = Field(default="idle", description="Rover state: idle, active, returning, error")
-    latitude: Optional[float] = Field(default=None, description="GPS Latitude")
-    longitude: Optional[float] = Field(default=None, description="GPS Longitude")
+class RoverBase(BaseModel):
+    rover_id: str = Field(..., max_length=50, description="Unique rover identifier (e.g. AR-001)")
+    name: str = Field(..., max_length=100, description="Rover friendly name")
+    status: Optional[str] = Field(default="idle", max_length=50, description="Rover operational status")
 
 
-class RoverStatusCreate(RoverStatusBase):
+class RoverCreate(RoverBase):
     pass
 
 
-class RoverStatusResponse(RoverStatusBase):
+class RoverResponse(RoverBase):
     id: int
     created_at: datetime
 
