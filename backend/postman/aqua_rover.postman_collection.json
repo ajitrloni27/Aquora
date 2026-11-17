@@ -1,0 +1,321 @@
+{
+  "info": {
+    "_postman_id": "a9a3b2b8-938a-4db3-b452-f4da4c35e982",
+    "name": "Aqua Rover Backend API",
+    "description": "Comprehensive Postman collection for Aqua Rover FastAPI backend. Covers Health, Rovers, Telemetry, Location, and AI Detections.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "rover_id",
+      "value": "AR-001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check service and database reachability. Returns 200 when healthy, 503 when degraded."
+          },
+          "response": [
+            {
+              "name": "200 Healthy",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/health",
+                  "host": ["{{base_url}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"status\": \"healthy\",\n  \"project\": \"Aqua Rover Backend\",\n  \"environment\": \"development\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"database\": \"connected\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rovers",
+      "item": [
+        {
+          "name": "Register Rover",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rover_id\": \"AR-002\",\n  \"name\": \"Aqua Rover Beta\",\n  \"status\": \"idle\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rovers",
+              "host": ["{{base_url}}"],
+              "path": ["rovers"]
+            },
+            "description": "Register a new rover. Returns 201 Created or 409 Conflict if rover_id already exists."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rover_id\": \"AR-002\",\n  \"name\": \"Aqua Rover Beta\",\n  \"status\": \"idle\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/rovers",
+                  "host": ["{{base_url}}"],
+                  "path": ["rovers"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": 2,\n  \"rover_id\": \"AR-002\",\n  \"name\": \"Aqua Rover Beta\",\n  \"status\": \"idle\",\n  \"created_at\": \"2026-10-06T10:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Rovers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rovers",
+              "host": ["{{base_url}}"],
+              "path": ["rovers"]
+            },
+            "description": "List all registered rovers in the fleet."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Rover Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rovers/{{rover_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rovers", "{{rover_id}}"]
+            },
+            "description": "Get rover metadata by unique string rover_id (e.g. AR-001). Returns 404 if unknown."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Telemetry & Location",
+      "item": [
+        {
+          "name": "Ingest Rover Telemetry",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rover_id\": \"{{rover_id}}\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"battery\": 82.5,\n  \"speed\": 0.8,\n  \"latitude\": 12.345678,\n  \"longitude\": 74.123456,\n  \"status\": \"moving\",\n  \"temperature\": 28.5,\n  \"signal\": 95.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rover/telemetry",
+              "host": ["{{base_url}}"],
+              "path": ["rover", "telemetry"]
+            },
+            "description": "Validate and store telemetry; ALSO writes a Location row from its latitude/longitude in ONE transaction. 201 Created."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rover_id\": \"{{rover_id}}\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"battery\": 82.5,\n  \"speed\": 0.8,\n  \"latitude\": 12.345678,\n  \"longitude\": 74.123456,\n  \"status\": \"moving\",\n  \"temperature\": 28.5,\n  \"signal\": 95.0\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/rover/telemetry",
+                  "host": ["{{base_url}}"],
+                  "path": ["rover", "telemetry"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "{\n  \"id\": 1,\n  \"rover_id\": \"AR-001\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"battery\": 82.5,\n  \"speed\": 0.8,\n  \"status\": \"moving\",\n  \"temperature\": 28.5,\n  \"signal\": 95.0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Latest Rover Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rover/status?rover_id={{rover_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rover", "status"],
+              "query": [
+                {
+                  "key": "rover_id",
+                  "value": "{{rover_id}}",
+                  "description": "Rover identifier (default AR-001)"
+                }
+              ]
+            },
+            "description": "Latest telemetry for a rover. 404 if the rover is unknown or has no telemetry recorded."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Latest Rover Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rover/location?rover_id={{rover_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rover", "location"],
+              "query": [
+                {
+                  "key": "rover_id",
+                  "value": "{{rover_id}}",
+                  "description": "Rover identifier (default AR-001)"
+                }
+              ]
+            },
+            "description": "Latest GPS coordinates for a rover. 404 if none."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Detections",
+      "item": [
+        {
+          "name": "Ingest Detections Batch",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rover_id\": \"{{rover_id}}\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"detections\": [\n    {\n      \"class_name\": \"plastic\",\n      \"confidence\": 0.91,\n      \"bbox\": [120, 80, 300, 250],\n      \"image_ref\": \"snapshots/AR-001_det_001.jpg\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/detections",
+              "host": ["{{base_url}}"],
+              "path": ["detections"]
+            },
+            "description": "Validate and store the AI detections batch payload. One Detection row per item in detections[] in ONE transaction. 201 Created."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rover_id\": \"{{rover_id}}\",\n  \"timestamp\": \"2026-10-06T10:30:00Z\",\n  \"detections\": [\n    {\n      \"class_name\": \"plastic\",\n      \"confidence\": 0.91,\n      \"bbox\": [120, 80, 300, 250],\n      \"image_ref\": \"snapshots/AR-001_det_001.jpg\"\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/detections",
+                  "host": ["{{base_url}}"],
+                  "path": ["detections"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{"key": "Content-Type", "value": "application/json"}],
+              "body": "[\n  {\n    \"id\": 1,\n    \"rover_id\": \"AR-001\",\n    \"timestamp\": \"2026-10-06T10:30:00Z\",\n    \"class_name\": \"plastic\",\n    \"confidence\": 0.91,\n    \"bbox\": [120, 80, 300, 250],\n    \"image_ref\": \"snapshots/AR-001_det_001.jpg\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "List Detections (Newest First)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/detections?rover_id={{rover_id}}&limit=50&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["detections"],
+              "query": [
+                {
+                  "key": "rover_id",
+                  "value": "{{rover_id}}",
+                  "description": "Filter by rover identifier"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Limit results (max 100)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Offset pagination"
+                }
+              ]
+            },
+            "description": "Query logged detections ordered newest first (timestamp DESC)."
+          },
+          "response": []
+        },
+        {
+          "name": "List Detections (Filtered)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/detections?class_name=plastic&min_confidence=0.85",
+              "host": ["{{base_url}}"],
+              "path": ["detections"],
+              "query": [
+                {
+                  "key": "class_name",
+                  "value": "plastic",
+                  "description": "Filter by class name"
+                },
+                {
+                  "key": "min_confidence",
+                  "value": "0.85",
+                  "description": "Minimum confidence threshold (0.0 to 1.0)"
+                }
+              ]
+            },
+            "description": "Query detections filtered by debris class name and minimum confidence threshold."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
