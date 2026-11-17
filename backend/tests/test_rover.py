@@ -78,3 +78,17 @@ def test_get_nonexistent_rover(client):
     resp = client.get("/rovers/UNKNOWN-ROVER-999")
     assert resp.status_code == 404
     assert "not found" in resp.json()["detail"].lower()
+
+
+def test_register_rover_validation_error(client):
+    """
+    Test POST /rovers with missing required fields returns 422 Unprocessable Entity.
+    """
+    # Missing rover_id and name
+    resp1 = client.post("/rovers", json={})
+    assert resp1.status_code == 422
+
+    # Missing name
+    resp2 = client.post("/rovers", json={"rover_id": "AR-999"})
+    assert resp2.status_code == 422
+
