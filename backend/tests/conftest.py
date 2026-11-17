@@ -9,7 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core.database import Base, get_db
+from app.db.base import Base
+from app.db.session import get_db
 from app.main import app
 
 # Use SQLite in-memory database for isolated, lightning-fast testing
