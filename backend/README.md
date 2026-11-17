@@ -124,7 +124,7 @@ React Web Dashboard (HTTP Polling)
 | Jetson Edge Simulator | **Working** | `scripts/simulate_jetson.py` with offline queue and retry. |
 | Postman Collection | **Working** | `postman/aqua_rover.postman_collection.json` with variables. |
 | Automated Test Suite | **Working** | 38 automated tests covering 200, 201, 404, 409, 422, 503. |
-| Dockerfile (API Container) | **Planned** | Standalone production image to run in Phase 8. |
+| Dockerfile (API Container) | **Working** | Production container image with automatic migrations and seed. |
 | Collection Statistics | **Planned** | Aggregated trash collection weight and counts. |
 | Image Storage (AWS S3) | **Planned** | Uploading snapshot images to Amazon S3 buckets. |
 | AWS Cloud Deployment | **Planned** | Hosting on AWS ECS / RDS with production domain. |
@@ -483,6 +483,8 @@ backend/
 ├── .gitignore                    # Ignored files (venv, env, cache)
 ├── alembic.ini                   # Alembic configuration file
 ├── docker-compose.yml            # Multi-container orchestration (Postgres + API)
+├── Dockerfile                    # Production container image definition
+├── entrypoint.sh                 # Container entrypoint: runs migrations, seeds AR-001, starts app
 └── requirements.txt              # Pinned Python project dependencies
 ```
 
