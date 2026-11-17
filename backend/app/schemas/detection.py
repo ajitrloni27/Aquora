@@ -46,7 +46,3 @@ class DetectionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-# Aliases for transition
-DetectionCreate = DetectionItem
-

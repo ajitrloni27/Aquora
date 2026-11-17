@@ -1,50 +1,43 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.detection import Detection
-from app.schemas.detection import DetectionCreate, DetectionResponse
+
+from app.db.session import get_db
+from app.schemas.detection import DetectionsBatchCreate, DetectionResponse
+from app.services import detection_service
 
 router = APIRouter(prefix="/detections", tags=["Detections"])
 
 
+@router.post("", response_model=List[DetectionResponse], status_code=status.HTTP_201_CREATED)
+def create_detections(payload: DetectionsBatchCreate, db: Session = Depends(get_db)):
+    """
+    Validate and store the AI detections payload.
+    Creates one Detection row per item in detections[], committed in one atomic transaction.
+    """
+    return detection_service.create_detections_batch(db, payload)
+
+
 @router.get("", response_model=List[DetectionResponse])
 def get_detections(
-    skip: int = Query(0, ge=0, description="Offset for pagination"),
-    limit: int = Query(50, ge=1, le=100, description="Limit records returned"),
-    label: Optional[str] = Query(None, description="Filter by detection label"),
+    rover_id: Optional[str] = Query(None, description="Filter detections by rover ID"),
+    class_name: Optional[str] = Query(None, description="Filter detections by class name (e.g. plastic)"),
+    min_confidence: Optional[float] = Query(
+        None, ge=0.0, le=1.0, description="Minimum confidence score threshold (0.0 - 1.0)"
+    ),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of detections to return (1-100)"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     db: Session = Depends(get_db),
 ):
     """
-    Retrieve logged detections, with optional filtering by label and pagination.
+    Retrieve logged detections, ordered newest first (timestamp DESC).
+    Supports filtering by rover_id, class_name, min_confidence, and offset/limit pagination.
     """
-    query = db.query(Detection)
-    if label:
-        query = query.filter(Detection.label.ilike(f"%{label}%"))
-    return query.order_by(Detection.id.desc()).offset(skip).limit(limit).all()
-
-
-@router.post("", response_model=DetectionResponse, status_code=status.HTTP_201_CREATED)
-def create_detection(payload: DetectionCreate, db: Session = Depends(get_db)):
-    """
-    Record a new object/debris detection event from the rover camera/sensors.
-    """
-    detection = Detection(**payload.model_dump())
-    db.add(detection)
-    db.commit()
-    db.refresh(detection)
-    return detection
-
-
-@router.get("/{detection_id}", response_model=DetectionResponse)
-def get_detection_by_id(detection_id: int, db: Session = Depends(get_db)):
-    """
-    Retrieve a specific detection event by its unique ID.
-    """
-    detection = db.query(Detection).filter(Detection.id == detection_id).first()
-    if not detection:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Detection with ID {detection_id} not found",
-        )
-    return detection
+    return detection_service.list_detections(
+        db,
+        rover_id=rover_id,
+        class_name=class_name,
+        min_confidence=min_confidence,
+        limit=limit,
+        offset=offset,
+    )
